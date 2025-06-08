@@ -63,6 +63,7 @@ indici_citta[1] = indici_citta[0] + conteggi[citta]
 df = weather_data.iloc[:, indici_citta[0] : indici_citta[1]]
 df["MONTH"] = weather_data.iloc[:, 1]
 df["BBQ"] = classification_data[citta + "_BBQ_weather"][:]
+df["DATE"] = classification_data["DATE"]
 
 
 #%% PRE-PROCESSING
@@ -75,6 +76,18 @@ df.dropna()
 
 print()
 
+#Rimozione duplicati
+df.drop_duplicates(inplace=True)
+
 #Impostiamo variabili categoriche quelle che non sono numeriche
+df["MONTH"]=df["MONTH"].astype("category")
+df["BBQ"]=df["BBQ"].astype("category")
+
+#Rimuoviamo la colonna con le date
+df.drop(columns = ["DATE"])
+
+#Rimozione valori fuori soglia
+
+
 
 
