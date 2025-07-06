@@ -77,7 +77,7 @@ print("Valori NaN")
 print(df.isnull().sum())
 
 #Rimozione valori nulli
-df.dropna()
+df.dropna(inplace = True)
 
 print()
 
@@ -87,11 +87,11 @@ df.drop_duplicates(inplace=True)
 #Impostiamo variabili categoriche quelle che non sono numeriche
 num_type = ["float64", "int64"]
 
-for col in weather_data.columns:
-    print(f"{col} type: {weather_data[col].dtype}.")
-    if weather_data[col].dtype not in num_type:
-        weather_data[col] = weather_data[col].astype("category")
-        print(f"{col} type: {weather_data[col].dtype}.")
+for col in df.columns:
+    print(f"{col} type: {df[col].dtype}.")
+    if df[col].dtype not in num_type:
+        df[col] = df[col].astype("category")
+        print(f"{col} type: {df[col].dtype}.")
     print("-" * 45)
 
 df["MONTH"]=df["MONTH"].astype("category")
@@ -102,7 +102,7 @@ df["DATE"] = df["DATE"].astype("category")
 colonne_numeriche = df.select_dtypes(include=num_type)
 
 #Rimuoviamo la colonna con le date
-df = df.drop(columns = ["DATE"])
+df.drop(columns = ["DATE"], inplace=True)
 
 #BoxPlot delle colonne numeriche per individuazione outliers
 #Viene scelta una distribuzione su 3 righe e 4 colonne perchè il numero massimo di features metereologiche è 11
