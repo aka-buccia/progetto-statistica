@@ -1,6 +1,9 @@
 #csv 
 *.csv
 
+#Jupyter Notebook stuff
+.virtual_documents/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
