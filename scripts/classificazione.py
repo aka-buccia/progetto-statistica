@@ -119,13 +119,48 @@ for j in range(i + 1, 3 * 4):
     
 plt.tight_layout()
 plt.show()
-    
-# Rimozione di valori errati
+
+#Valutazione estremi
+riassunto = colonne_numeriche.describe()
+estremi = riassunto.loc[["min", "max"]]
+print(estremi)
+
+
+# print(f"Intervallo temperatura minima: [{min(df[f"{citta}_temp_min"])}; {max(df[f"{citta}_temp_min"])}]")
+# print(f"Intervallo temperatura media: [{min(df[f"{citta}_temp_mean"])}; {max(df[f"{citta}_temp_mean"])}]")
+# print(f"Intervallo temperatura massima: [{min(df[f"{citta}_temp_max"])}; {max(df[f"{citta}_temp_max"])}]")
+
 
 #OSLO è sotto al circolo polare artico, 
 #le ore di luce dunque non possono essere più di 20
 df = df[df[f"{citta}_sunshine"] < 20]
 
+
+#Rimozione outliers sospetti (distanza dal centro superiore a 3 IQR)
+def calcola_outliers(valori):
+    # Converti l'array in un array NumPy
+    valori = np.array(valori)
+
+    # Calcola il primo quartile (Q1), il terzo quartile (Q3) e IQR
+    Q1 = np.percentile(valori, 25)
+    Q3 = np.percentile(valori, 75)
+    IQR = Q3 - Q1
+    
+    # Calcola i limiti per gli outliers
+    limite_inferiore = Q1 - 3 * IQR
+    limite_superiore = Q3 + 3 * IQR
+    
+    return limite_inferiore, limite_superiore
+
+#rimozione degli outliers sospetti relativi a 5 parametri metereologici su cui non sono già state operate differenti valutazioni
+for colonna in ["_wind_speed", "_wind_gust", "_humidity", "_pressure", "_precipitation"]:
+    colonna = f"{citta}" + colonna
+    limite_inferiore, limite_superiore = calcola_outliers(df[colonna])
+    df = df[(df[colonna] > limite_inferiore) & (df[colonna] < limite_superiore)]
+
+
+
+#%% EDA
 
 #Distribuzione valori colonne numeriche
 fig, axes = plt.subplots(nrows=3, ncols=4, figsize=(15, 5))
@@ -138,25 +173,4 @@ for i, colonna in enumerate(colonne_numeriche):
 
 plt.tight_layout()
 plt.show()
-
-
-
-# def calcola_outliers(valori):
-#     # Converti l'array in un array NumPy
-#     valori = np.array(valori)
-
-#     # Calcola il primo quartile (Q1), il terzo quartile (Q3) e IQR
-#     Q1 = np.percentile(valori, 25)
-#     Q3 = np.percentile(valori, 75)
-#     IQR = Q3 - Q1
-    
-#     # Calcola i limiti per gli outliers
-#     limite_inferiore = Q1 - 3 * IQR
-#     limite_superiore = Q3 + 3 * IQR
-    
-#     return limite_inferiore, limite_superiore
-
-# for colonna in colonne_numeriche:
-#     limite_inferiore, limite_superiore = calcola_outliers(df[colonna])
-#     df = df[(df[colonna] > limite_inferiore) & (df[colonna] < limite_superiore)]
 
