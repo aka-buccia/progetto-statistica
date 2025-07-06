@@ -106,7 +106,7 @@ df.drop(columns = ["DATE"], inplace=True)
 
 #BoxPlot delle colonne numeriche per individuazione outliers
 #Viene scelta una distribuzione su 3 righe e 4 colonne perchè il numero massimo di features metereologiche è 11
-fig, axes = plt.subplots(nrows=3, ncols=4, figsize=(15, 5))
+fig, axes = plt.subplots(nrows=3, ncols=4, figsize=(15, 8))
 
 for i, colonna in enumerate(colonne_numeriche):
     ax = axes[i // 4, i % 4]
@@ -163,14 +163,49 @@ for colonna in ["_wind_speed", "_wind_gust", "_humidity", "_pressure", "_precipi
 #%% EDA
 
 #Distribuzione valori colonne numeriche
-fig, axes = plt.subplots(nrows=3, ncols=4, figsize=(15, 5))
+fig, axes = plt.subplots(nrows=3, ncols=4, figsize=(15, 8))
 
 
 for i, colonna in enumerate(colonne_numeriche):
     ax = axes[i // 4, i % 4]
-    ax.hist(df[colonna], bins = 20, color="orange")
+    sns.histplot(df[colonna], kde = True, bins = 20, color="orange", ax = ax)
     ax.set_title(f"{colonna}")
 
 plt.tight_layout()
 plt.show()
+
+#Ripartizione dei record nei vari mesi dell'anno
+plt.figure(figsize = (5,5))
+temp = df["MONTH"].value_counts().sort_index()[::-1]
+plt.pie(temp.values,
+        labels = temp.index,
+        startangle = 90,
+        autopct='%.1f%%')
+plt.show()
+
+
+#Percentuale di record con condizioni meteo per bbq
+plt.figure(figsize = (5,5))
+plt.pie(df["BBQ"].value_counts().sort_index(), 
+        explode=[0, 0.1],
+        autopct='%.1f%%')
+plt.legend(["False", "True"]);
+plt.show()
+
+# Condizione meteo rispetto ai parametri metereologici
+fig, axes = plt.subplots(nrows=3, ncols=4, figsize=(15, 8))
+for i, colonna in enumerate(colonne_numeriche):
+    ax = axes[i // 4, i % 4]
+    sns.kdeplot(data = df, x = colonna, hue = "BBQ", fill = True, ax = ax, warn_singular=False)
+    plt.title(f"{colonna} condition for BBQ")
+
+# Nascondi gli assi non utilizzati
+for j in range(i + 1, 3 * 4):
+    fig.delaxes(axes[j // 4, j % 4])
+
+plt.tight_layout()
+plt.show()
+
+
+#%% Splitting
 
