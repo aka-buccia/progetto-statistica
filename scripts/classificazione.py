@@ -211,6 +211,46 @@ for j in range(i + 1, 3 * 4):
 plt.tight_layout()
 plt.show()
 
+# Boxplot dei parametri rispetto alla condizione meteo
+fig, axes = plt.subplots(nrows=3, ncols=4, figsize=(15, 8))
+
+for i, colonna in enumerate(colonne_numeriche):
+    ax = axes[i // 4, i % 4]
+    sns.boxplot(x = "BBQ", y = colonna, data = df, ax = ax)
+
+# Nascondi gli assi non utilizzati
+for j in range(i + 1, 3 * 4):
+    fig.delaxes(axes[j // 4, j % 4])
+    
+plt.tight_layout()
+plt.show()
+
+# Matrice di correlazione dei parametri metereologici
+matrice_correlazione = colonne_numeriche.corr()
+plt.figure(figsize=(8, 6))
+sns.heatmap(matrice_correlazione, annot=True, cmap='coolwarm', fmt=".2f")
+plt.title('Matrice di correlazione')
+plt.show()
+
+
+#Analisi bivariate di parametri metereologici con correlazione alta
+#Ore di luce - nuvolosità
+sns.boxplot(x = f"{citta}_cloud_cover", y = f"{citta}_sunshine", data = df)
+plt.show()
+
+#Irraggiamento - ore di luce
+plt.scatter(df[f"{citta}_global_radiation"], df[f"{citta}_sunshine"], alpha=0.5, color="red")
+plt.title("Scatter plot irraggiamento - ore di luce")
+plt.xlabel("Irraggiamento (100 W/m2)")
+plt.ylabel("Ore di luce (h)")
+plt.show()
+
+#Irraggiamento - temperatura massima
+plt.scatter(df[f"{citta}_global_radiation"], df[f"{citta}_temp_max"], alpha=0.5, color="red")
+plt.title("Scatter plot irraggiamento - temperatura massima")
+plt.xlabel("Irraggiamento (100 W/m2)")
+plt.ylabel("Temperatura massima (Celsius)")
+plt.show()
 
 #%% SPLITTING
 def splitting(random_seed):
@@ -255,7 +295,6 @@ for modello in modelli:
 
 
 #%% HYPERPARAMETER TUNING
-
 
 
 
