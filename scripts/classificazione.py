@@ -5,6 +5,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.svm import SVC
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, confusion_matrix
 
 #%% IMPORT WEATHER DATASET
 #Caricamento del dataset contenente i dati metereologici
@@ -158,7 +162,8 @@ for colonna in ["_wind_speed", "_wind_gust", "_humidity", "_pressure", "_precipi
     limite_inferiore, limite_superiore = calcola_outliers(df[colonna])
     df = df[(df[colonna] > limite_inferiore) & (df[colonna] < limite_superiore)]
 
-
+#aggiorno il dataset delle colonne numeriche
+colonne_numeriche = df.select_dtypes(include=num_type)
 
 #%% EDA
 
@@ -207,5 +212,79 @@ plt.tight_layout()
 plt.show()
 
 
-#%% Splitting
+#%% SPLITTING
+def splitting(random_seed):
+    X = colonne_numeriche.values
+    print(X)
+    y = df["BBQ"]
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=random_seed)
+    return X_train, X_test, y_train, y_test
+
+X_train, X_test, y_train, y_test = splitting(42)
+
+
+#%% ADDESTRAMENTO
+# Scelta di alcuni modelli standard per l'addestramento
+
+#SVC
+k = "linear"
+c = 10
+model_SVC = SVC(kernel = k, C = c)
+
+#Logistic Regression
+model_logistic_regression = LogisticRegression(solver = "liblinear", max_iter=100)
+
+#SVM poly
+k = "poly"
+d = 3
+model_SVM_poly = SVC(kernel = k, C = c, degree=d)
+
+#SVM rbf
+k = "rbf"
+g = 1
+model_SVM_rbf = SVC(kernel = k, C = c, gamma = g)
+
+
+modelli = [model_SVC, model_SVM_poly, model_SVM_rbf]
+
+#addestramento dei modelli sul training set
+model_logistic_regression.fit(X_train, y_train)
+
+for modello in modelli:
+    modello.fit(X_train, y_train)
+
+
+#%% HYPERPARAMETER TUNING
+
+
+
+
+
+
+
+
+
+#%% VALUTAZIONE PERFORMANCE    
+# Misuriamo l'accuratezza del modello
+y_pred = modello.predict(X_test)
+conf_mat = confusion_matrix(y_test, y_pred)
+
+# Calcolare l'accuratezza sulla validation set
+accuracy_val = accuracy_score(y_test, y_pred)
+print(f"Accuracy sul validation set: {accuracy_val:.4f}")
+
+# Creazione dell'heatmap della matrice di confusione
+plt.figure(figsize=(10, 8))
+sns.heatmap(conf_mat, annot=True, fmt="d", cmap="Oranges", cbar=False)
+plt.title(f"Modello ...")
+plt.xlabel("Predicted")
+plt.ylabel("True")
+plt.show()
+
+
+
+
+
+
+
 
