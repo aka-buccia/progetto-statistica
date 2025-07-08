@@ -189,15 +189,17 @@ plt.pie(temp.values,
         labels = temp.index,
         startangle = 90,
         autopct='%.1f%%')
+plt.title("Distribuzione mensile delle registrazioni")
 plt.show()
 
 
-#Percentuale di record con condizioni meteo per bbq
+#Percentuale di record con meteo per bbq
 plt.figure(figsize = (5,5))
-plt.pie(df["BBQ"].value_counts().sort_index(), 
+plt.pie(df["BBQ"].value_counts().sort_index()[::-1], 
         explode=[0, 0.1],
         autopct='%.1f%%')
-plt.legend(["False", "True"]);
+plt.legend(["True", "False"]);
+plt.title("Distribuzione delle classi")
 plt.show()
 
 # Condizione meteo rispetto ai parametri metereologici
@@ -350,32 +352,52 @@ print("Accuratezza Logistic Regression sul validation set:", accuracy_logistic)
 
 
 # Determina il miglior modello in base alle accuratezze
-model = None
+modello = None
+accuratezza_validation = 0
 if accuracy_SVC > accuracy_logistic:
-    model = best_model_SVC
+    modello = best_model_SVC
+    accuratezza_validation = accuracy_SVC
 else:
-    model = best_model_logistic
-
-
+    modello = best_model_logistic
+    accuratezza_validation = accuracy_logistic
 
 #%% VALUTAZIONE PERFORMANCE    
-# Misuriamo l'accuratezza del modello
-y_pred = modello.predict(X_test)
-conf_mat = confusion_matrix(y_test, y_pred)
 
-# Calcolare l'accuratezza sulla validation set
-accuracy_val = accuracy_score(y_test, y_pred)
-print(f"Accuracy sul validation set: {accuracy_val:.4f}")
+
+
+# Effettua le predizioni sul testing dataset
+y_pred = modello.predict(X_test)
+
+# Calcolo matrice di confusione
+matrice_confusione = confusion_matrix(y_test, y_pred)
+
 
 # Creazione dell'heatmap della matrice di confusione
 plt.figure(figsize=(10, 8))
-sns.heatmap(conf_mat, annot=True, fmt="d", cmap="Oranges", cbar=False)
-plt.title(f"Modello ...")
-plt.xlabel("Predicted")
-plt.ylabel("True")
+labels = ['False', 'True']
+sns.heatmap(matrice_confusione, annot=True, fmt="d", cmap="Oranges", cbar=False, xticklabels=labels, yticklabels=labels)
+plt.title("Matrice di confusione")
+plt.xlabel("Predetti")
+plt.ylabel("Reali")
 plt.show()
 
 
+# Calcolo delle metriche
+tn, fp, fn, tp = matrice_confusione.ravel()
+
+accuratezza = (tp + tn) / (tp + tn + fp + fn)
+sensitivity = tp / (tp + fn) if (tp + fn) > 0 else 0
+specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
+precision = tp / (tp + fp) if (tp + fp) > 0 else 0
+npv = tn / (tn + fn) if (tn + fn) > 0 else 0
+
+# Stampa metriche
+print(f"Accuratezza: {accuratezza:.4f}")
+print(f"Errore di misclassificazione: {(1 - accuratezza):.4f}")
+print(f"Sensitività: {sensitivity:.2f}")
+print(f"Specificità: {specificity:.2f}")
+print(f"Precisione: {precision:.2f}")
+print(f"Valore Predittivo Negativo (NPV): {npv:.2f}")
 
 
 
