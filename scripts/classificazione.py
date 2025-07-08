@@ -9,6 +9,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, confusion_matrix
+from sklearn.model_selection import GridSearchCV
+from sklearn.exceptions import ConvergenceWarning
+import warnings
 
 #%% IMPORT WEATHER DATASET
 #Caricamento del dataset contenente i dati metereologici
@@ -272,6 +275,7 @@ c = 10
 model_SVC = SVC(kernel = k, C = c)
 
 #Logistic Regression
+warnings.filterwarnings("ignore", category=ConvergenceWarning)
 model_logistic_regression = LogisticRegression(solver = "liblinear", max_iter=100)
 
 #SVM poly
@@ -285,21 +289,72 @@ g = 1
 model_SVM_rbf = SVC(kernel = k, C = c, gamma = g)
 
 
-modelli = [model_SVC, model_SVM_poly, model_SVM_rbf]
+modelli_SVM = [model_SVC, model_SVM_poly, model_SVM_rbf]
 
 #addestramento dei modelli sul training set
 model_logistic_regression.fit(X_train, y_train)
 
-for modello in modelli:
+for modello in modelli_SVM:
     modello.fit(X_train, y_train)
 
 
 #%% HYPERPARAMETER TUNING
+X_test, X_val, y_test, y_val = train_test_split(X_test, y_test, test_size = 0.5, random_state = 42)
+
+# Definire gli spazi degli iperparametri per SVM e Regressione Logistica
+param_grid_SVC = {
+    'C': [0.1, 1, 10, 100],
+    'degree': [2, 3, 4],  # Solo per il kernel 'poly'
+    'gamma': ['scale', 'auto']  # Solo per i kernel 'rbf' e 'poly'
+}
+
+param_grid_logistic_regression = {
+    'solver' : ['liblinear', 'saga'],
+    'C': [0.1, 1, 10, 100]
+}
+
+# GridSearchCV per SVM
+best_model_SVC = None
+accuracy_SVC = 0
+best_params_SVC = {}
+
+for modello in modelli_SVM:
+    # Tuning degli iperparametri in base all'accuratezza
+    grid_search = GridSearchCV(modello, param_grid_SVC, cv=5, scoring='accuracy')
+    grid_search.fit(X_val, y_val)
+    
+    # Determina il miglior modello e i migliori parametri
+    if grid_search.best_score_ > accuracy_SVC:
+        accuracy_SVC = grid_search.best_score_
+        best_model_SVC = grid_search.best_estimator_
+        best_params_SVC = grid_search.best_params_
+
+print("Miglior modello SVC:", best_model_SVC)
+print("Migliori parametri SVC:", best_params_SVC)
+print("Accuratezza SVC sul validation set:", accuracy_SVC)
+
+# GridSearchCV per Logistic Regression
+grid_search_logistic = GridSearchCV(model_logistic_regression, param_grid_logistic_regression, cv=5, scoring='accuracy')
+grid_search_logistic.fit(X_val, y_val)
+
+# Determina il miglior estimatore e i migliori parametri
+best_model_logistic = grid_search_logistic.best_estimator_
+best_params_logistic = grid_search_logistic.best_params_
+
+# Prestazioni sui validation set
+accuracy_logistic = accuracy_score(y_val, best_model_logistic.predict(X_val))
+
+print("Miglior modello Logistic Regression:", best_model_logistic)
+print("Migliori parametri Logistic Regression:", best_params_logistic)
+print("Accuratezza Logistic Regression sul validation set:", accuracy_logistic)
 
 
-
-
-
+# Determina il miglior modello in base alle accuratezze
+model = None
+if accuracy_SVC > accuracy_logistic:
+    model = best_model_SVC
+else:
+    model = best_model_logistic
 
 
 
