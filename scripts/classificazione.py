@@ -363,8 +363,6 @@ else:
 
 #%% VALUTAZIONE PERFORMANCE    
 
-
-
 # Effettua le predizioni sul testing dataset
 y_pred = modello.predict(X_test)
 
@@ -399,6 +397,15 @@ print(f"Specificità: {specificity:.2f}")
 print(f"Precisione: {precision:.2f}")
 print(f"Valore Predittivo Negativo (NPV): {npv:.2f}")
 
+#%% STUDIO STATISTICO SUI RISULTATI DELLA VALUTAZIONE
+for k in np.random.randint(low = 0, high = 100, size = 10):
+
+    #Generazione di due nuovi testing dataset e training dataset
+    X_train, X_test, y_train, y_test = splitting(k)
+
+    #Training e testing del dataset
+    modello.fit(X_train, y_train)
+    y_pred = modello.predict(X_test)
 
 
 
