@@ -7,42 +7,46 @@ import seaborn as sns
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, confusion_matrix
 from sklearn.model_selection import GridSearchCV
+from sklearn.linear_model import LinearRegression
 from sklearn.exceptions import ConvergenceWarning
 import warnings
+from scipy.stats import t as tt
+from scipy.stats import norm
+import math
+from sklearn.model_selection import cross_val_score
+from sklearn.metrics import mean_squared_error, r2_score
+from scipy.stats import shapiro
+import scipy.stats as stats
+import statsmodels.api as sm
 
-#%% IMPORT WEATHER DATASET
+#%% IMPORT DATASET
+#%% Import dati metereologici
 #Caricamento del dataset contenente i dati metereologici
 weather_data = pd.read_csv("../data/raw/weather_prediction_dataset.csv")
 
-#print(weather_data.head())
-
 print(f"Il weather dataset ha {weather_data.shape[0]} record e {weather_data.shape[1]} colonne")
-
 
 print("Etichette colonne weather_data:")
 print(weather_data.columns)
-# for etichetta_colonna in weather_data.columns:
-#     print(etichetta_colonna)
+
 print()
 
-#%% IMPORT BBQ LABEL DATASET
+#%% Import condizioni metereologiche
 #Caricamento del dataset indicante le registrazioni con meteo da bbq e quelle non
 classification_data = pd.read_csv("../data/raw/weather_prediction_bbq_labels.csv")
 
-#print(classification_data.head())
-print(f"Il bbq label dataset ha {classification_data.shape[0]} record e {classification_data.shape[1]} colonne")
+print(f"Il classification dataset ha {classification_data.shape[0]} record e {classification_data.shape[1]} colonne")
 
 print("Etichette colonne classification_data:")
 print(classification_data.columns)
-# for etichetta_colonna in classification_data.columns:
-#     print(etichetta_colonna)
+
 print()
 
-#%% INDIVIDUAZIONE SOTTODATABASE 
-#lista_città = [s.replace("_BBQ_weather", "") for s in classification_data.columns[1:]]
+#%% Analisi struttura dataset
+#Calcolo numero di parametri metereologici registrati per città
 conteggi = {}
 
 for item in weather_data.columns[2:]:
@@ -52,31 +56,31 @@ for item in weather_data.columns[2:]:
     else:
         conteggi[citta] = 1
 
-numero_parametri = max(conteggi.values())
+#Stampa città e numero di parametri associati
 print("Numero parametri meteorologici per città:")
 for citta, conteggio in conteggi.items():
     print(f"{citta}: {conteggio}")    
 print()
-#Roma non è presente nel classification_data
+
+#Numero città registrate nei database
 print(f"Numero città weather dataset: {len(conteggi.keys())}")
-print(f"Numero città bbq label dataset: {len(classification_data.columns) -1}")
+print(f"Numero città classification dataset: {len(classification_data.columns) -1}")
 
-#Selezione città e individuazione indici
+#%% Selezione città: OSLO
+#Selezione città e individuazione indici nel dataset
 citta = "OSLO"
-chiavi = list(conteggi.keys())
-valori = list(conteggi.values())
+chiavi = list(conteggi.keys()) #lista città
+valori = list(conteggi.values()) #num parametri associati ad ogni citta
 indici_citta = [0,0]
-indici_citta[0] = sum(valori[:chiavi.index(citta)]) + 2
-indici_citta[1] = indici_citta[0] + conteggi[citta]
-
-#print(indici_citta)
+indici_citta[0] = sum(valori[:chiavi.index(citta)]) + 2 #posizione prima colonna della città
+indici_citta[1] = indici_citta[0] + conteggi[citta] #posizione ultima colonna della città
 
 #Costruzione dataset città
-df = weather_data.iloc[:, indici_citta[0] : indici_citta[1]]
-df["MONTH"] = weather_data.iloc[:, 1]
-df["BBQ"] = classification_data[citta + "_BBQ_weather"][:]
+df = weather_data.iloc[:, indici_citta[0] : indici_citta[1]] #dati metereologici città
+df["MONTH"] = weather_data["MONTH"]
+df["BBQ"] = classification_data[citta + "_BBQ_weather"] 
 df["DATE"] = classification_data["DATE"]
-df.to_csv(f"../data/processed/{citta}_weather_dataset.csv")
+df.to_csv(f"../data/processed/{citta}_weather_dataset.csv") #salvataggio del dataset creato
 
 #%% PRE-PROCESSING
 #Analisi valori nulli
