@@ -83,19 +83,20 @@ df["DATE"] = classification_data["DATE"]
 df.to_csv(f"../data/processed/{citta}_weather_dataset.csv") #salvataggio del dataset creato
 
 #%% PRE-PROCESSING
+
+#%% Rimozione valori nulli e duplicati
 #Analisi valori nulli
-print("Valori NaN")
+print("Valori NaN per colonna:")
 print(df.isnull().sum())
 
 #Rimozione valori nulli
 df.dropna(inplace = True)
 
-print()
-
 #Rimozione duplicati
 df.drop_duplicates(inplace=True)
 
-#Impostiamo variabili categoriche quelle che non sono numeriche
+#%% Variabili categoriche e numeriche
+#Imposta variabili categoriche quelle non numeriche
 num_type = ["float64", "int64"]
 
 for col in df.columns:
@@ -112,8 +113,11 @@ df["DATE"] = df["DATE"].astype("category")
 #Sub-dataset con solo colonne numeriche
 colonne_numeriche = df.select_dtypes(include=num_type)
 
-#Rimuoviamo la colonna con le date
+#Rimozione della colonna con le date
 df.drop(columns = ["DATE"], inplace=True)
+
+
+#%% Outliers
 
 #BoxPlot delle colonne numeriche per individuazione outliers
 #Viene scelta una distribuzione su 3 righe e 4 colonne perchè il numero massimo di features metereologiche è 11
@@ -124,32 +128,24 @@ for i, colonna in enumerate(colonne_numeriche):
     sns.boxplot(data = df[colonna], ax = ax)
     plt.title(f"{colonna}")
 
-# Nascondi gli assi non utilizzati
+# Nasconde gli assi non utilizzati (grafici vuoti)
 for j in range(i + 1, 3 * 4):
     fig.delaxes(axes[j // 4, j % 4])
     
 plt.tight_layout()
 plt.show()
 
-#Valutazione estremi
-riassunto = colonne_numeriche.describe()
-estremi = riassunto.loc[["min", "max"]]
+#Intervalli feature numeriche
+estremi = colonne_numeriche.describe().loc[["min", "max"]]
 print(estremi)
 
-
-# print(f"Intervallo temperatura minima: [{min(df[f"{citta}_temp_min"])}; {max(df[f"{citta}_temp_min"])}]")
-# print(f"Intervallo temperatura media: [{min(df[f"{citta}_temp_mean"])}; {max(df[f"{citta}_temp_mean"])}]")
-# print(f"Intervallo temperatura massima: [{min(df[f"{citta}_temp_max"])}; {max(df[f"{citta}_temp_max"])}]")
-
-
-#OSLO è sotto al circolo polare artico, 
-#le ore di luce dunque non possono essere più di 20
+#Rimozione delle giornate con più di 20 ore di luce
 df = df[df[f"{citta}_sunshine"] < 20]
 
 
-#Rimozione outliers sospetti (distanza dal centro superiore a 3 IQR)
+#Calcolo outliers sospetti (distanza dal centro superiore a 3 IQR)
 def calcola_outliers(valori):
-    # Converti l'array in un array NumPy
+    # Converte in array numpy
     valori = np.array(valori)
 
     # Calcola il primo quartile (Q1), il terzo quartile (Q3) e IQR
@@ -157,19 +153,20 @@ def calcola_outliers(valori):
     Q3 = np.percentile(valori, 75)
     IQR = Q3 - Q1
     
-    # Calcola i limiti per gli outliers
+    # Calcola i limiti per gli outliers sospetti
     limite_inferiore = Q1 - 3 * IQR
     limite_superiore = Q3 + 3 * IQR
     
     return limite_inferiore, limite_superiore
 
-#rimozione degli outliers sospetti relativi a 5 parametri metereologici su cui non sono già state operate differenti valutazioni
+#Rimozione degli outliers sospetti
+#La rimozione avviene solo per 5 parametri metereologici su cui non sono già state operate differenti valutazioni
 for colonna in ["_wind_speed", "_wind_gust", "_humidity", "_pressure", "_precipitation"]:
     colonna = f"{citta}" + colonna
     limite_inferiore, limite_superiore = calcola_outliers(df[colonna])
     df = df[(df[colonna] > limite_inferiore) & (df[colonna] < limite_superiore)]
 
-#aggiorno il dataset delle colonne numeriche
+#Aggiornamento del sub-dataset con solo colonne numeriche
 colonne_numeriche = df.select_dtypes(include=num_type)
 
 #%% EDA
