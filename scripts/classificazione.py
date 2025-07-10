@@ -23,6 +23,7 @@ import scipy.stats as stats
 import statsmodels.api as sm
 
 #%% IMPORT DATASET
+
 #%% Import dati metereologici
 #Caricamento del dataset contenente i dati metereologici
 weather_data = pd.read_csv("../data/raw/weather_prediction_dataset.csv")
@@ -120,6 +121,12 @@ df.drop(columns = ["DATE"], inplace=True)
 #%% Outliers
 
 #BoxPlot delle colonne numeriche per individuazione outliers
+
+# Metodo per nascondere gli assi non utilizzati (grafici vuoti)
+def rimuovi_assi_superflui():
+    for j in range(i + 1, 3 * 4):
+        fig.delaxes(axes[j // 4, j % 4])
+        
 #Viene scelta una distribuzione su 3 righe e 4 colonne perchè il numero massimo di features metereologiche è 11
 fig, axes = plt.subplots(nrows=3, ncols=4, figsize=(15, 8))
 
@@ -128,10 +135,8 @@ for i, colonna in enumerate(colonne_numeriche):
     sns.boxplot(data = df[colonna], ax = ax)
     plt.title(f"{colonna}")
 
-# Nasconde gli assi non utilizzati (grafici vuoti)
-for j in range(i + 1, 3 * 4):
-    fig.delaxes(axes[j // 4, j % 4])
-    
+rimuovi_assi_superflui()
+
 plt.tight_layout()
 plt.show()
 
@@ -171,7 +176,7 @@ colonne_numeriche = df.select_dtypes(include=num_type)
 
 #%% EDA
 
-#Distribuzione valori colonne numeriche
+#%% Distribuzione valori colonne numeriche [istogrammi]
 fig, axes = plt.subplots(nrows=3, ncols=4, figsize=(15, 8))
 
 
@@ -180,10 +185,11 @@ for i, colonna in enumerate(colonne_numeriche):
     sns.histplot(df[colonna], kde = True, bins = 20, color="orange", ax = ax)
     ax.set_title(f"{colonna}")
 
+rimuovi_assi_superflui()
 plt.tight_layout()
 plt.show()
 
-#Ripartizione dei record nei vari mesi dell'anno
+#%% Ripartizione dei record nei vari mesi dell'anno [grafico a torta]
 plt.figure(figsize = (5,5))
 temp = df["MONTH"].value_counts().sort_index()[::-1]
 plt.pie(temp.values,
@@ -194,26 +200,25 @@ plt.title("Distribuzione mensile delle registrazioni")
 plt.show()
 
 
-#Percentuale di record con meteo per bbq
+#%% Divisione dei record in base alla condizione meteo [grafico a torta]
 plt.figure(figsize = (5,5))
-plt.pie(df["BBQ"].value_counts().sort_index()[::-1], 
-        explode=[0, 0.1],
-        autopct='%.1f%%')
-plt.legend(["True", "False"]);
+plt.pie(df["BBQ"].value_counts().sort_index()[::-1],#mette prima i True e poi i False
+        explode=[0, 0.1], #distanza delle due fette di torta
+        autopct='%.1f%%') #formattazione della percentuale
+plt.legend(["True (bel tempo)", "False (brutto tempo)"]);
 plt.title("Distribuzione delle classi")
 plt.show()
 
-# Condizione meteo rispetto ai parametri metereologici
+#%% Classificazione meteo rispetto ai parametri metereologici
+
+# Condizione meteo rispetto ai parametri metereologici [kde plot]
 fig, axes = plt.subplots(nrows=3, ncols=4, figsize=(15, 8))
+
 for i, colonna in enumerate(colonne_numeriche):
     ax = axes[i // 4, i % 4]
     sns.kdeplot(data = df, x = colonna, hue = "BBQ", fill = True, ax = ax, warn_singular=False)
-    plt.title(f"{colonna} condition for BBQ")
 
-# Nascondi gli assi non utilizzati
-for j in range(i + 1, 3 * 4):
-    fig.delaxes(axes[j // 4, j % 4])
-
+rimuovi_assi_superflui()
 plt.tight_layout()
 plt.show()
 
@@ -224,62 +229,72 @@ for i, colonna in enumerate(colonne_numeriche):
     ax = axes[i // 4, i % 4]
     sns.boxplot(x = "BBQ", y = colonna, data = df, ax = ax)
 
-# Nascondi gli assi non utilizzati
-for j in range(i + 1, 3 * 4):
-    fig.delaxes(axes[j // 4, j % 4])
-    
+rimuovi_assi_superflui()
 plt.tight_layout()
 plt.show()
 
-# Matrice di correlazione dei parametri metereologici
+#%% Matrice di correlazione dei parametri metereologici
 matrice_correlazione = colonne_numeriche.corr()
 plt.figure(figsize=(8, 6))
 sns.heatmap(matrice_correlazione, annot=True, cmap='coolwarm', fmt=".2f")
 plt.title('Matrice di correlazione')
 plt.show()
 
-
-#Analisi bivariate di parametri metereologici con correlazione alta
+#%% Analisi bivariate di parametri metereologici con correlazione alta
 #Ore di luce - nuvolosità
 sns.boxplot(x = f"{citta}_cloud_cover", y = f"{citta}_sunshine", data = df)
+plt.title("Nuvolosità - ore di luce")
+plt.xlabel("Nuvolosità (oaks")
+plt.ylabel("Ore di luce (h)")
 plt.show()
 
 #Irraggiamento - ore di luce
 plt.scatter(df[f"{citta}_global_radiation"], df[f"{citta}_sunshine"], alpha=0.5, color="red")
-plt.title("Scatter plot irraggiamento - ore di luce")
+plt.title("Irraggiamento - ore di luce")
 plt.xlabel("Irraggiamento (100 W/m2)")
 plt.ylabel("Ore di luce (h)")
 plt.show()
 
 #Irraggiamento - temperatura massima
 plt.scatter(df[f"{citta}_global_radiation"], df[f"{citta}_temp_max"], alpha=0.5, color="red")
-plt.title("Scatter plot irraggiamento - temperatura massima")
+plt.title("Irraggiamento - temperatura massima")
 plt.xlabel("Irraggiamento (100 W/m2)")
 plt.ylabel("Temperatura massima (Celsius)")
 plt.show()
 
+#Irraggiamento - umidità
+plt.scatter(df[f"{citta}_global_radiation"], df[f"{citta}_humidity"], alpha=0.5, color="red")
+plt.title("Irraggiamento - umidità")
+plt.xlabel("Irraggiamento (W/m^2)")
+plt.ylabel("Umidità (%)")
+plt.show()
+
 #%% SPLITTING
+
+#Funzione per dividere il dataset in training dataset e testing dataset (80 - 20)
 def splitting(random_seed):
     X = colonne_numeriche.values
-    print(X)
     y = df["BBQ"]
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=random_seed)
     return X_train, X_test, y_train, y_test
 
+# Divisione del dataset in train e test
 X_train, X_test, y_train, y_test = splitting(42)
 
 
 #%% ADDESTRAMENTO
 # Scelta di alcuni modelli standard per l'addestramento
+# Vengono scelti alcuni valori standard per gli iperparametri
+
+#Logistic Regression
+#Non mostra i warning riguardanti i casi in cui il modello non raggiunge la convergenza
+warnings.filterwarnings("ignore", category=ConvergenceWarning)
+model_logistic_regression = LogisticRegression(max_iter=100)
 
 #SVC
 k = "linear"
 c = 10
 model_SVC = SVC(kernel = k, C = c)
-
-#Logistic Regression
-warnings.filterwarnings("ignore", category=ConvergenceWarning)
-model_logistic_regression = LogisticRegression(solver = "liblinear", max_iter=100)
 
 #SVM poly
 k = "poly"
@@ -299,7 +314,6 @@ model_logistic_regression.fit(X_train, y_train)
 
 for modello in modelli_SVM:
     modello.fit(X_train, y_train)
-
 
 #%% HYPERPARAMETER TUNING
 X_test, X_val, y_test, y_val = train_test_split(X_test, y_test, test_size = 0.5, random_state = 42)
