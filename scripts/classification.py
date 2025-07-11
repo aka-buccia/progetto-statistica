@@ -12,7 +12,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import GridSearchCV
 from sklearn.exceptions import ConvergenceWarning
 import warnings
-from scipy.stats import t as tt
+from scipy.stats import t
 from scipy.stats import norm
 import math
 
@@ -61,6 +61,7 @@ print()
 #Numero città registrate nei database
 print(f"Numero città weather dataset: {len(conteggi.keys())}")
 print(f"Numero città classification dataset: {len(classification_data.columns) -1}")
+print()
 
 #%% Selezione città: OSLO
 #Selezione città e individuazione indici nel dataset
@@ -76,7 +77,7 @@ df = weather_data.iloc[:, indici_citta[0] : indici_citta[1]] #dati metereologici
 df["MONTH"] = weather_data["MONTH"]
 df["BBQ"] = classification_data[citta + "_BBQ_weather"] 
 df["DATE"] = classification_data["DATE"]
-df.to_csv(f"../data/processed/{citta}_weather_dataset.csv") #salvataggio del dataset creato
+df.to_csv(f"../data/processed/{citta}_weather_dataset.csv") #export del dataset della città creato
 
 #%% PRE-PROCESSING
 
@@ -171,6 +172,9 @@ for colonna in ["_wind_speed", "_wind_gust", "_humidity", "_pressure", "_precipi
 
 #Aggiornamento del sub-dataset con solo colonne numeriche
 colonne_numeriche = df.select_dtypes(include=num_type)
+
+#Export dataset ripulito
+df.to_csv(f"../data/processed/{citta}_weather_dataset_clean.csv")
 
 #%% EDA
 
@@ -494,7 +498,7 @@ def inferenza_media(n, campione, alfa):
     limite_superiore = limite_inferiore = 0
     
     if n < 40: #se l'intervallo ha meno di 40 elementi utilizza il quantile della distribuzione t di student
-        t_value = tt.ppf(1 - alfa/2, n-1)
+        t_value = t.ppf(1 - alfa/2, n-1)
         limite_inferiore = media - t_value * (S / math.sqrt(n))
         limite_superiore = media + t_value * (S / math.sqrt(n))
     
@@ -533,7 +537,7 @@ for metrica in metriche_srs:
     sns.histplot(campione, kde = True, bins = k, color="orange", ax = axes[0]) #istogramma
     sns.boxplot(data = campione, ax = axes[1]) #boxplot
 
-    plt.suptitle(f"{metrica}")
+    plt.suptitle(f"{metrica.upper()}")
     plt.tight_layout()
     plt.show()
     print()
