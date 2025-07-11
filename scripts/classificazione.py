@@ -452,4 +452,95 @@ print(f"Accuratezza sul testing set: {accuratezza:.4f}")
 print(f"Accuratezza sul validation set: {accuratezza_validation:.4f}")
 print(f"Accuratezza sul training set: {(accuracy_score(y_train, y_pred_train)):.4f}")
 
-#%% 
+#%% STUDIO STATISTICO SUI RISULTATI DELLA VALUTAZIONE
+
+#%% Geenerazione dei campioni
+# Generazione casuale di k valori, usati come semi generatori per la costruzione di k training e testing set
+k = 20
+semi_generatori = np.random.randint(low = 0, high = 100, size = k) 
+
+#Dizionario con chiavi le metriche e valori la lista di k valori misurati per ogni metrica
+metriche_srs = {
+    'accuratezza': [],
+    'sensitivita': [],
+    'specificita': [],
+    'precisione': [],
+    'npv': []
+}
+
+
+for seed in semi_generatori:
+
+    #Generazione di un nuovo training set e testing set
+    X_train, X_test, y_train, y_test = splitting(seed)
+
+    #Training e testing del modello
+    modello.fit(X_train, y_train)
+    y_pred = modello.predict(X_test)
+
+    #Calcolo della matrice di confusione
+    matrice_confusione = confusion_matrix(y_test, y_pred)
+
+    #Calcolo delle metriche e inserimento dei valori nel dizionario
+    metriche = calcolo_metriche(matrice_confusione)
+    metriche_srs['accuratezza'].append(metriche[0]) 
+    metriche_srs['sensitivita'].append(metriche[1])  
+    metriche_srs['specificita'].append(metriche[2])  
+    metriche_srs['precisione'].append(metriche[3])  
+    metriche_srs['npv'].append(metriche[4])
+
+#%% Stima media e intervallo di confidenza
+
+#Funzione per calcolare l'intervallo di confidenza per la media di un campione di n elementi
+def inferenza_media(n, campione, alfa):
+    media = np.mean(campione) #calcola la media del campione
+    S_2 = campione.var(ddof = 1) #stimatore corretto della varianza
+    S = math.sqrt(S_2) #deviazione standard stimata
+    limite_superiore = limite_inferiore = 0
+    
+    if n < 40: #se l'intervallo ha meno di 40 elementi utilizza il quantile della distribuzione t di student
+        t_value = tt.ppf(1 - alfa/2, n-1)
+        limite_inferiore = media - t_value * (S / math.sqrt(n))
+        limite_superiore = media + t_value * (S / math.sqrt(n))
+    
+    else: #se l'intervallo ha 40 o più elementi utilizza il quantile della distribuzione normale
+        z_value = norm.ppf(1 - alfa/2)
+        limite_inferiore = media - z_value * (S / math.sqrt(n))
+        limite_superiore = media + z_value * (S / math.sqrt(n))
+        
+    print(f"Intervallo di confidenza della media: [{limite_inferiore:.4f}; {limite_superiore:.4f}]")
+
+#%% Descrizione campioni e inferenza della media
+
+print(f"Numero di elementi dei campioni: {k}")
+print("Studio statistico sui risultati della valutazione:")
+print()
+
+# Ciclo sulle metriche del dizionario
+# Per ogni metrica viene effettuata un'analisi descrittiva del campione e viene fatta inferenza sulla media
+for metrica in metriche_srs:
+    #Selezione del campione, trasformato in array numpy
+    metriche_srs[metrica] = np.array(metriche_srs[metrica])
+    campione = metriche_srs[metrica]
+
+    #Calcolo delle misure di statistica descrittiva
+    print(f"{metrica.upper()}")
+    print(f"Media: {(np.mean(campione)):.4f}")
+    inferenza_media(len(campione), campione, 0.05) #calcolo dell'intervallo di confidenza della media
+    print(f"Mediana: {(np.median(campione)):.4f}")
+    
+    print(f"Varianza: {(campione.var(ddof = 0)):.4f}")
+    print(f"IQR: {(np.percentile(campione, 75) - np.percentile(campione, 25)):.4f}")
+
+    #Stampa dei grafici di distribuzione dei valori
+    fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(8, 5))
+    
+    sns.histplot(campione, kde = True, bins = k, color="orange", ax = axes[0]) #istogramma
+    sns.boxplot(data = campione, ax = axes[1]) #boxplot
+
+    plt.suptitle(f"{metrica}")
+    plt.tight_layout()
+    plt.show()
+    print()
+    
+#%%
