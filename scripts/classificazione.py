@@ -271,14 +271,14 @@ plt.show()
 
 #%% SPLITTING
 
-#Funzione per dividere il dataset in training dataset e testing dataset (80 - 20)
+#Funzione per dividere il dataset in training set e testing set (80 - 20)
 def splitting(random_seed):
     X = colonne_numeriche.values
     y = df["BBQ"]
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=random_seed)
     return X_train, X_test, y_train, y_test
 
-# Divisione del dataset in train e test
+# Divisione del dataset in train set e test set
 X_train, X_test, y_train, y_test = splitting(42)
 
 
@@ -309,61 +309,74 @@ model_SVM_rbf = SVC(kernel = k, C = c, gamma = g)
 
 modelli_SVM = [model_SVC, model_SVM_poly, model_SVM_rbf]
 
-#addestramento dei modelli sul training set
+#Addestramento dei modelli sul training set
 model_logistic_regression.fit(X_train, y_train)
 
 for modello in modelli_SVM:
     modello.fit(X_train, y_train)
 
 #%% HYPERPARAMETER TUNING
+
+#%% Divisione del testing set in validation e testing (50 - 50)
 X_test, X_val, y_test, y_val = train_test_split(X_test, y_test, test_size = 0.5, random_state = 42)
 
-# Definire gli spazi degli iperparametri per SVM e Regressione Logistica
+#%% Definizione dei valori degli iperparametri da testare
+# Definisce alcuni valori degli iperparametri per SVM 
 param_grid_SVC = {
     'C': [0.1, 1, 10, 100],
     'degree': [2, 3, 4],  # Solo per il kernel 'poly'
     'gamma': ['scale', 'auto']  # Solo per i kernel 'rbf' e 'poly'
 }
 
+# Definisce alcuni valori degli iperparametri per Regressione Logistica
 param_grid_logistic_regression = {
-    'solver' : ['liblinear', 'saga'],
+    'solver' : ['saga', 'liblinear'],
     'C': [0.1, 1, 10, 100]
 }
 
-# GridSearchCV per SVM
-best_model_SVC = None
-accuracy_SVC = 0
-best_params_SVC = {}
+
+#%% Hyperparameter tuning su modelli SVM
+
+modello_migliore_SVM = None
+accuratezza_SVM = 0
+parametri_migliori_SVM = {}
 
 for modello in modelli_SVM:
-    # Tuning degli iperparametri in base all'accuratezza
+    
+    # Prova ogni modello con tutte le combinazioni di valori definiti per gli iperparametri
     grid_search = GridSearchCV(modello, param_grid_SVC, cv=5, scoring='accuracy')
     grid_search.fit(X_val, y_val)
     
-    # Determina il miglior modello e i migliori parametri
-    if grid_search.best_score_ > accuracy_SVC:
-        accuracy_SVC = grid_search.best_score_
-        best_model_SVC = grid_search.best_estimator_
-        best_params_SVC = grid_search.best_params_
+    # Mantiene salvato il modello con accuratezza migliore e i suoi parametri associati
+    if grid_search.best_score_ > accuratezza_SVM:
+        accuratezza_SVM = grid_search.best_score_
+        modello_migliore_SVM = grid_search.best_estimator_
+        parametri_migliori_SVM = grid_search.best_params_
 
-print("Miglior modello SVC:", best_model_SVC)
-print("Migliori parametri SVC:", best_params_SVC)
-print("Accuratezza SVC sul validation set:", accuracy_SVC)
+#Accuratezza del modello migliore sul validation set
+accuratezza_SVM = accuracy_score(y_val, modello_migliore_SVM.predict(X_val))
 
-# GridSearchCV per Logistic Regression
-grid_search_logistic = GridSearchCV(model_logistic_regression, param_grid_logistic_regression, cv=5, scoring='accuracy')
-grid_search_logistic.fit(X_val, y_val)
+print("Miglior modello SVC:", modello_migliore_SVM)
+print("Migliori parametri SVC:", parametri_migliori_SVM)
+print("Accuratezza SVC sul validation set:", accuratezza_SVM)
+
+#%% Hyperparameter tuning su modello Regressione Logistica
+
+# Prova il modello con ogni combinazione di valori definiti per gli iperparametri
+grid_search_logistica = GridSearchCV(model_logistic_regression, param_grid_logistic_regression, cv=5, scoring='accuracy')
+grid_search_logistica.fit(X_val, y_val)
 
 # Determina il miglior estimatore e i migliori parametri
-best_model_logistic = grid_search_logistic.best_estimator_
-best_params_logistic = grid_search_logistic.best_params_
+modello_migliore_logistica = grid_search_logistica.best_estimator_
+parametri_migliori_logistica = grid_search_logistica.best_params_
 
-# Prestazioni sui validation set
-accuracy_logistic = accuracy_score(y_val, best_model_logistic.predict(X_val))
+# Accuratezza del modello migliore sul validation set
+accuratezza_logistica = accuracy_score(y_val, modello_migliore_logistica.predict(X_val))
+accuratezza_logistica = grid_search_logistica.best_score_
 
-print("Miglior modello Logistic Regression:", best_model_logistic)
-print("Migliori parametri Logistic Regression:", best_params_logistic)
-print("Accuratezza Logistic Regression sul validation set:", accuracy_logistic)
+print("Miglior modello Regressione Logistica:", modello_migliore_logistica)
+print("Migliori parametri Regressione Logistica:", parametri_migliori_logistica)
+print("Accuratezza Regressione Logistica sul validation set:", accuratezza_logistica)
 
 
 # Determina il miglior modello in base alle accuratezze
