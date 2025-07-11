@@ -89,6 +89,7 @@ df.to_csv(f"../data/processed/{citta}_weather_dataset.csv") #salvataggio del dat
 #Analisi valori nulli
 print("Valori NaN per colonna:")
 print(df.isnull().sum())
+print()
 
 #Rimozione valori nulli
 df.dropna(inplace = True)
@@ -100,12 +101,14 @@ df.drop_duplicates(inplace=True)
 #Imposta variabili categoriche quelle non numeriche
 num_type = ["float64", "int64"]
 
+print("Feature categoriche e numeriche: ")
 for col in df.columns:
     print(f"{col} type: {df[col].dtype}.")
     if df[col].dtype not in num_type:
         df[col] = df[col].astype("category")
         print(f"{col} type: {df[col].dtype}.")
     print("-" * 45)
+print()
 
 df["MONTH"]=df["MONTH"].astype("category")
 df["BBQ"]=df["BBQ"].astype("category")
@@ -359,6 +362,7 @@ accuratezza_SVM = accuracy_score(y_val, modello_migliore_SVM.predict(X_val))
 print("Miglior modello SVC:", modello_migliore_SVM)
 print("Migliori parametri SVC:", parametri_migliori_SVM)
 print("Accuratezza SVC sul validation set:", accuratezza_SVM)
+print()
 
 #%% Hyperparameter tuning su modello Regressione Logistica
 
@@ -377,26 +381,31 @@ accuratezza_logistica = grid_search_logistica.best_score_
 print("Miglior modello Regressione Logistica:", modello_migliore_logistica)
 print("Migliori parametri Regressione Logistica:", parametri_migliori_logistica)
 print("Accuratezza Regressione Logistica sul validation set:", accuratezza_logistica)
+print()
 
+#%% Selezione del modello migliore
 
-# Determina il miglior modello in base alle accuratezze
+# Sceglie il miglior modello in base all'accuratezza
 modello = None
 accuratezza_validation = 0
-if accuracy_SVC > accuracy_logistic:
-    modello = best_model_SVC
-    accuratezza_validation = accuracy_SVC
+if accuratezza_SVM > accuratezza_logistica:
+    modello = modello_migliore_SVM
+    accuratezza_validation = accuratezza_SVM
 else:
-    modello = best_model_logistic
-    accuratezza_validation = accuracy_logistic
+    modello = modello_migliore_logistica
+    accuratezza_validation = accuratezza_logistica
 
-#%% VALUTAZIONE PERFORMANCE    
+print(f"Modello scelto: {modello}")
 
-# Effettua le predizioni sul testing dataset
+#%% VALUTAZIONE PERFORMANCE
+
+#%% Matrice di confusione 
+
+# Effettua le predizioni sul testing set
 y_pred = modello.predict(X_test)
 
-# Calcolo matrice di confusione
+#Calcola matrice di confusione
 matrice_confusione = confusion_matrix(y_test, y_pred)
-
 
 # Creazione dell'heatmap della matrice di confusione
 plt.figure(figsize=(10, 8))
@@ -407,35 +416,40 @@ plt.xlabel("Predetti")
 plt.ylabel("Reali")
 plt.show()
 
+#%% Metriche
+
+#Funzione per calcolo delle metriche a partire dalla matrice di confusione
+def calcolo_metriche(matrice_confusione):
+    
+    tn, fp, fn, tp = matrice_confusione.ravel()
+
+    accuratezza = (tp + tn) / (tp + tn + fp + fn)
+    sensitivita = tp / (tp + fn) if (tp + fn) > 0 else 0
+    specificita = tn / (tn + fp) if (tn + fp) > 0 else 0
+    precisione = tp / (tp + fp) if (tp + fp) > 0 else 0
+    npv = tn / (tn + fn) if (tn + fn) > 0 else 0
+
+    return accuratezza, sensitivita, specificita, precisione, npv
 
 # Calcolo delle metriche
-tn, fp, fn, tp = matrice_confusione.ravel()
-
-accuratezza = (tp + tn) / (tp + tn + fp + fn)
-sensitivity = tp / (tp + fn) if (tp + fn) > 0 else 0
-specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
-precision = tp / (tp + fp) if (tp + fp) > 0 else 0
-npv = tn / (tn + fn) if (tn + fn) > 0 else 0
+accuratezza, sensitivita, specificita, precisione, npv = calcolo_metriche(matrice_confusione)
 
 # Stampa metriche
+print("METRICHE MODELLO:")
 print(f"Accuratezza: {accuratezza:.4f}")
 print(f"Errore di misclassificazione: {(1 - accuratezza):.4f}")
-print(f"Sensitività: {sensitivity:.2f}")
-print(f"Specificità: {specificity:.2f}")
-print(f"Precisione: {precision:.2f}")
-print(f"Valore Predittivo Negativo (NPV): {npv:.2f}")
+print(f"Sensitività: {sensitivita:.4f}")
+print(f"Specificità: {specificita:.4f}")
+print(f"Precisione: {precisione:.4f}")
+print(f"Valore Predittivo Negativo (NPV): {npv:.4f}")
+print()
 
-#%% STUDIO STATISTICO SUI RISULTATI DELLA VALUTAZIONE
-for k in np.random.randint(low = 0, high = 100, size = 10):
+#%% Overfitting e underfitting
+#Effettua predizione sul training set per valutare overfitting/underfitting
+y_pred_train = modello.predict(X_train)
 
-    #Generazione di due nuovi testing dataset e training dataset
-    X_train, X_test, y_train, y_test = splitting(k)
+print(f"Accuratezza sul testing set: {accuratezza:.4f}")
+print(f"Accuratezza sul validation set: {accuratezza_validation:.4f}")
+print(f"Accuratezza sul training set: {(accuracy_score(y_train, y_pred_train)):.4f}")
 
-    #Training e testing del dataset
-    modello.fit(X_train, y_train)
-    y_pred = modello.predict(X_test)
-
-
-
-
-
+#%% 
