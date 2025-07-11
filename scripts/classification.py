@@ -7,20 +7,15 @@ import seaborn as sns
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC
-from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+from sklearn.metrics import accuracy_score, confusion_matrix
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import GridSearchCV
-from sklearn.linear_model import LinearRegression
 from sklearn.exceptions import ConvergenceWarning
 import warnings
 from scipy.stats import t as tt
 from scipy.stats import norm
 import math
-from sklearn.model_selection import cross_val_score
-from sklearn.metrics import mean_squared_error, r2_score
-from scipy.stats import shapiro
-import scipy.stats as stats
-import statsmodels.api as sm
+
 
 #%% IMPORT DATASET
 
