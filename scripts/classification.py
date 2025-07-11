@@ -260,14 +260,14 @@ plt.show()
 #Irraggiamento - temperatura massima
 plt.scatter(df[f"{citta}_global_radiation"], df[f"{citta}_temp_max"], alpha=0.5, color="red")
 plt.title("Irraggiamento - temperatura massima")
-plt.xlabel("Irraggiamento (100 W/m2)")
-plt.ylabel("Temperatura massima (Celsius)")
+plt.xlabel("Irraggiamento (100 W/m²)")
+plt.ylabel("Temperatura massima (°C)")
 plt.show()
 
 #Irraggiamento - umidità
 plt.scatter(df[f"{citta}_global_radiation"], df[f"{citta}_humidity"], alpha=0.5, color="red")
 plt.title("Irraggiamento - umidità")
-plt.xlabel("Irraggiamento (W/m^2)")
+plt.xlabel("Irraggiamento (W/m²)")
 plt.ylabel("Umidità (%)")
 plt.show()
 
