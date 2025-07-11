@@ -253,7 +253,7 @@ plt.show()
 #Irraggiamento - ore di luce
 plt.scatter(df[f"{citta}_global_radiation"], df[f"{citta}_sunshine"], alpha=0.5, color="red")
 plt.title("Irraggiamento - ore di luce")
-plt.xlabel("Irraggiamento (100 W/m2)")
+plt.xlabel("Irraggiamento (100 W/m²)")
 plt.ylabel("Ore di luce (h)")
 plt.show()
 
