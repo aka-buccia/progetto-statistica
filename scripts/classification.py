@@ -19,8 +19,8 @@ import math
 
 #%% IMPORT DATASET
 
-#%% Import dati metereologici
-#Caricamento del dataset contenente i dati metereologici
+#%% Import dati meteorologici
+#Caricamento del dataset contenente i dati meteorologici
 weather_data = pd.read_csv("../data/raw/weather_prediction_dataset.csv")
 
 print(f"Il weather dataset ha {weather_data.shape[0]} record e {weather_data.shape[1]} colonne")
@@ -30,7 +30,7 @@ print(weather_data.columns)
 
 print()
 
-#%% Import condizioni metereologiche
+#%% Import condizioni meteorologiche
 #Caricamento del dataset indicante le registrazioni con meteo da bbq e quelle non
 classification_data = pd.read_csv("../data/raw/weather_prediction_bbq_labels.csv")
 
@@ -42,7 +42,7 @@ print(classification_data.columns)
 print()
 
 #%% Analisi struttura dataset
-#Calcolo numero di parametri metereologici registrati per città
+#Calcolo numero di parametri meteorologici registrati per città
 conteggi = {}
 
 for item in weather_data.columns[2:]:
@@ -73,7 +73,7 @@ indici_citta[0] = sum(valori[:chiavi.index(citta)]) + 2 #posizione prima colonna
 indici_citta[1] = indici_citta[0] + conteggi[citta] #posizione ultima colonna della città
 
 #Costruzione dataset città
-df = weather_data.iloc[:, indici_citta[0] : indici_citta[1]] #dati metereologici città
+df = weather_data.iloc[:, indici_citta[0] : indici_citta[1]] #dati meteorologici città
 df["MONTH"] = weather_data["MONTH"]
 df["BBQ"] = classification_data[citta + "_BBQ_weather"] 
 df["DATE"] = classification_data["DATE"]
@@ -126,7 +126,7 @@ def rimuovi_assi_superflui():
     for j in range(i + 1, 3 * 4):
         fig.delaxes(axes[j // 4, j % 4])
         
-#Viene scelta una distribuzione su 3 righe e 4 colonne perchè il numero massimo di features metereologiche è 11
+#Viene scelta una distribuzione su 3 righe e 4 colonne perchè il numero massimo di features meteorologiche è 11
 fig, axes = plt.subplots(nrows=3, ncols=4, figsize=(15, 8))
 
 for i, colonna in enumerate(colonne_numeriche):
@@ -164,7 +164,7 @@ def calcola_outliers(valori):
     return limite_inferiore, limite_superiore
 
 #Rimozione degli outliers sospetti
-#La rimozione avviene solo per 5 parametri metereologici su cui non sono già state operate differenti valutazioni
+#La rimozione avviene solo per 5 parametri meteorologici su cui non sono già state operate differenti valutazioni
 for colonna in ["_wind_speed", "_wind_gust", "_humidity", "_pressure", "_precipitation"]:
     colonna = f"{citta}" + colonna
     limite_inferiore, limite_superiore = calcola_outliers(df[colonna])
@@ -211,9 +211,9 @@ plt.legend(["True (bel tempo)", "False (brutto tempo)"]);
 plt.title("Distribuzione delle classi")
 plt.show()
 
-#%% Classificazione meteo rispetto ai parametri metereologici
+#%% Classificazione meteo rispetto ai parametri meteorologici
 
-# Condizione meteo rispetto ai parametri metereologici [kde plot]
+# Condizione meteo rispetto ai parametri meteorologici [kde plot]
 fig, axes = plt.subplots(nrows=3, ncols=4, figsize=(15, 8))
 
 for i, colonna in enumerate(colonne_numeriche):
@@ -235,14 +235,14 @@ rimuovi_assi_superflui()
 plt.tight_layout()
 plt.show()
 
-#%% Matrice di correlazione dei parametri metereologici
+#%% Matrice di correlazione dei parametri meteorologici
 matrice_correlazione = colonne_numeriche.corr()
 plt.figure(figsize=(8, 6))
 sns.heatmap(matrice_correlazione, annot=True, cmap='coolwarm', fmt=".2f")
 plt.title('Matrice di correlazione')
 plt.show()
 
-#%% Analisi bivariate di parametri metereologici con correlazione alta
+#%% Analisi bivariate di parametri meteorologici con correlazione alta
 #Ore di luce - nuvolosità
 sns.boxplot(x = f"{citta}_cloud_cover", y = f"{citta}_sunshine", data = df)
 plt.title("Nuvolosità - ore di luce")
