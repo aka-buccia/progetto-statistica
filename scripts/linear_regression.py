@@ -25,7 +25,7 @@ modello_regressione_lineare.fit(X, Y_osservati)
 #Predizione tramite il modello
 Y_predetti = modello_regressione_lineare.predict(X)
 
-#%% Coefficienti retta di regressione
+#%% Parametri retta di regressione
 
 intercetta = modello_regressione_lineare.intercept_
 coefficiente_angolare = modello_regressione_lineare.coef_[0]
@@ -54,18 +54,6 @@ print(f"MSE: {(mean_squared_error(Y_osservati, Y_predetti)):.4f} °C²")
 #Calcolo residui
 residui = Y_osservati - Y_predetti
 
-# Q-Q plot
-sm.qqplot(residui, line='s')
-plt.title('Q-Q Plot dei Residui')
-plt.xlabel('Quantili Teorici')
-plt.ylabel('Quantili dei Residui')
-plt.show()
-
-## Verifica normalità dei residui (test di Shapiro-Wilk)
-shapiro_test = shapiro(residui)
-print(f"Test di Shapiro-Wilk p-value: {(shapiro_test.pvalue):.4e}")
-
-
 #Istogramma per osservare la distribuzione dei residui [istogramma]
 sns.histplot(residui, kde = True, color="orange")
 plt.xlabel("Residui")
@@ -81,3 +69,17 @@ sns.boxplot(residui)
 plt.title('Boxplot dei Residui')
 plt.ylabel("Dimensione residui (°C)")
 plt.show()
+
+# Q-Q plot
+sm.qqplot(residui, line='s')
+plt.title('Q-Q Plot dei Residui')
+plt.xlabel('Quantili Teorici')
+plt.ylabel('Quantili dei Residui')
+plt.show()
+
+## Verifica normalità dei residui (test di Shapiro-Wilk)
+shapiro_test = shapiro(residui)
+print(f"Test di Shapiro-Wilk p-value: {(shapiro_test.pvalue):.4e}")
+
+
+
