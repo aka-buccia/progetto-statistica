@@ -147,7 +147,7 @@ print(estremi)
 df = df[df[f"{citta}_sunshine"] < 20]
 
 #Rimozione delle temperature minime sotto lo 0 se si verificano nei mesi estivi
-df_filtrato = df[~((df[f"{citta}_temp_min"] < 0) & (df['MONTH'].isin([6, 7, 8])))]
+df = df[~((df[f"{citta}_temp_min"] < 0) & (df['MONTH'].isin([6, 7, 8])))]
 
 #Calcolo outliers sospetti (distanza dal centro superiore a 3 IQR)
 def calcola_outliers(valori):
@@ -353,7 +353,7 @@ X_test, X_val, y_test, y_val = train_test_split(X_test, y_test, test_size = 0.5,
 param_grid_SVC = {
     'C': [0.1, 1, 10, 100],
     'degree': [2, 3, 4],  # Solo per il kernel 'poly'
-    'gamma': ['scale', 'auto']  # Solo per i kernel 'rbf' e 'poly'
+    'gamma': ['scale', 'auto', 1]  # Solo per i kernel 'rbf' e 'poly'
 }
 
 # Definisce alcuni valori degli iperparametri per Regressione Logistica
