@@ -4,6 +4,9 @@
 #Jupyter Notebook stuff
 .virtual_documents/
 
+#PPTX
+*.pptx
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
