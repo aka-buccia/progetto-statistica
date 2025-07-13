@@ -146,6 +146,8 @@ print(estremi)
 #Rimozione delle giornate con più di 20 ore di luce
 df = df[df[f"{citta}_sunshine"] < 20]
 
+#Rimozione delle temperature minime sotto lo 0 se si verificano nei mesi estivi
+df_filtrato = df[~((df[f"{citta}_temp_min"] < 0) & (df['MONTH'].isin([6, 7, 8])))]
 
 #Calcolo outliers sospetti (distanza dal centro superiore a 3 IQR)
 def calcola_outliers(valori):
@@ -178,7 +180,7 @@ df.to_csv(f"../data/processed/{citta}_weather_dataset_clean.csv")
 
 #%% EDA
 
-#%% Distribuzione valori colonne numeriche [istogrammi]
+#%% Distribuzione valori colonne numeriche
 fig, axes = plt.subplots(nrows=3, ncols=4, figsize=(15, 8))
 
 
@@ -191,7 +193,7 @@ rimuovi_assi_superflui()
 plt.tight_layout()
 plt.show()
 
-#%% Ripartizione dei record nei vari mesi dell'anno [grafico a torta]
+#%% Ripartizione dei record nei vari mesi dell'anno
 plt.figure(figsize = (5,5))
 temp = df["MONTH"].value_counts().sort_index()[::-1]
 plt.pie(temp.values,
@@ -201,14 +203,30 @@ plt.pie(temp.values,
 plt.title("Distribuzione mensile delle registrazioni")
 plt.show()
 
+#%% Distribuzione delle classi
 
-#%% Divisione dei record in base alla condizione meteo [grafico a torta]
+#Divisione dei record in base alla condizione meteo
 plt.figure(figsize = (5,5))
 plt.pie(df["BBQ"].value_counts().sort_index()[::-1],#mette prima i True e poi i False
         explode=[0, 0.1], #distanza delle due fette di torta
         autopct='%.1f%%') #formattazione della percentuale
 plt.legend(["True (bel tempo)", "False (brutto tempo)"]);
 plt.title("Distribuzione delle classi")
+plt.show()
+
+#Distribuzione delle classi su base mensile [grafici torta]
+fig, axes = plt.subplots(nrows=3, ncols=4, figsize=(15, 8))
+
+for i in range(12):
+    ax = axes[i // 4, i % 4]
+    mese = df[df["MONTH"] == i+1]
+    ax.pie(mese["BBQ"].value_counts().sort_index()[::-1],#mette prima i True e poi i False
+        explode=[0, 0.1], #distanza delle due fette di torta
+        autopct='%.1f%%', #formattazione della percentuale
+        )
+    ax.set_title(f"Mese {i+1}")
+
+plt.tight_layout()
 plt.show()
 
 #%% Classificazione meteo rispetto ai parametri meteorologici
@@ -246,7 +264,7 @@ plt.show()
 #Ore di luce - nuvolosità
 sns.boxplot(x = f"{citta}_cloud_cover", y = f"{citta}_sunshine", data = df)
 plt.title("Nuvolosità - ore di luce")
-plt.xlabel("Nuvolosità (oaks")
+plt.xlabel("Nuvolosità (okta)")
 plt.ylabel("Ore di luce (h)")
 plt.show()
 
@@ -269,6 +287,14 @@ plt.scatter(df[f"{citta}_global_radiation"], df[f"{citta}_humidity"], alpha=0.5,
 plt.title("Irraggiamento - umidità")
 plt.xlabel("Irraggiamento (W/m²)")
 plt.ylabel("Umidità (%)")
+plt.show()
+
+#%% Analisi multivariata
+# Distribuzione classi rispetto alla temperatura media nelle giornate senza precipitazioni
+precipitazioni_assenti = df[df[f"{citta}_precipitation"] == 0]
+sns.kdeplot(data = precipitazioni_assenti, x = f"{citta}_temp_mean", hue = "BBQ", fill = True)
+plt.title("Distribuzione classi nei giorni senza precipitazioni")
+plt.figure(figsize = (5,5))
 plt.show()
 
 #%% SPLITTING
@@ -436,7 +462,7 @@ accuratezza, sensitivita, specificita, precisione, npv = calcolo_metriche(matric
 # Stampa metriche
 print("METRICHE MODELLO:")
 print(f"Accuratezza: {accuratezza:.4f}")
-print(f"Errore di misclassificazione: {(1 - accuratezza):.4f}")
+print(f"MR: {(1 - accuratezza):.4f}")
 print(f"Sensitività: {sensitivita:.4f}")
 print(f"Specificità: {specificita:.4f}")
 print(f"Precisione: {precisione:.4f}")
