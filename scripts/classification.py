@@ -135,7 +135,7 @@ for i, colonna in enumerate(colonne_numeriche):
     plt.title(f"{colonna}")
 
 rimuovi_assi_superflui()
-
+plt.suptitle("Boxplot colonne numeriche")
 plt.tight_layout()
 plt.show()
 
@@ -190,6 +190,7 @@ for i, colonna in enumerate(colonne_numeriche):
     ax.set_title(f"{colonna}")
 
 rimuovi_assi_superflui()
+plt.suptitle("Distribuzione valori feature")
 plt.tight_layout()
 plt.show()
 
@@ -215,7 +216,7 @@ plt.title("Distribuzione delle classi")
 plt.show()
 
 #Distribuzione delle classi su base mensile [grafici torta]
-fig, axes = plt.subplots(nrows=3, ncols=4, figsize=(15, 8))
+fig, axes = plt.subplots(nrows=3, ncols=4, figsize=(8, 6))
 
 for i in range(12):
     ax = axes[i // 4, i % 4]
@@ -226,6 +227,7 @@ for i in range(12):
         )
     ax.set_title(f"Mese {i+1}")
 
+plt.suptitle("Classificazione su base mensile")
 plt.tight_layout()
 plt.show()
 
@@ -239,6 +241,7 @@ for i, colonna in enumerate(colonne_numeriche):
     sns.kdeplot(data = df, x = colonna, hue = "BBQ", fill = True, ax = ax, warn_singular=False)
 
 rimuovi_assi_superflui()
+plt.suptitle("Distribuzione classi rispetto alle feature")
 plt.tight_layout()
 plt.show()
 
@@ -250,6 +253,7 @@ for i, colonna in enumerate(colonne_numeriche):
     sns.boxplot(x = "BBQ", y = colonna, data = df, ax = ax)
 
 rimuovi_assi_superflui()
+plt.suptitle("Condizioni meteo rispetto alle feature")
 plt.tight_layout()
 plt.show()
 
