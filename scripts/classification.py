@@ -525,7 +525,6 @@ def inferenza_media(n, campione, alfa):
     media = np.mean(campione) #calcola la media del campione
     S_2 = campione.var(ddof = 1) #stimatore corretto della varianza
     S = math.sqrt(S_2) #deviazione standard stimata
-    limite_superiore = limite_inferiore = 0
     
     if n < 40: #se l'intervallo ha meno di 40 elementi utilizza il quantile della distribuzione t di student
         t_value = t.ppf(1 - alfa/2, n-1)
