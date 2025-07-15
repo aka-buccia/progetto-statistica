@@ -483,10 +483,9 @@ print(f"Accuratezza sul training set: {(accuracy_score(y_train, y_pred_train)):.
 
 #%% STUDIO STATISTICO SUI RISULTATI DELLA VALUTAZIONE
 
-#%% Geenerazione dei campioni
-# Generazione casuale di k valori, usati come semi generatori per la costruzione di k training e testing set
+#%% Generazione dei campioni
+# Dimensione dei campioni delle metriche
 k = 20
-semi_generatori = np.random.randint(low = 0, high = 100, size = k) 
 
 #Dizionario con chiavi le metriche e valori la lista di k valori misurati per ogni metrica
 metriche_srs = {
@@ -498,7 +497,7 @@ metriche_srs = {
 }
 
 
-for seed in semi_generatori:
+for seed in range(1, k+1):
 
     #Generazione di un nuovo training set e testing set
     X_train, X_test, y_train, y_test = splitting(seed)
