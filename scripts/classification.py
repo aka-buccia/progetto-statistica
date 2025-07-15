@@ -466,7 +466,7 @@ accuratezza, sensitivita, specificita, precisione, npv = calcolo_metriche(matric
 # Stampa metriche
 print("METRICHE MODELLO:")
 print(f"Accuratezza: {accuratezza:.4f}")
-print(f"MR: {(1 - accuratezza):.4f}")
+print(f"Tasso di Misclassificazinoe (MR): {(1 - accuratezza):.4f}")
 print(f"Sensitività: {sensitivita:.4f}")
 print(f"Specificità: {specificita:.4f}")
 print(f"Precisione: {precisione:.4f}")
@@ -480,6 +480,7 @@ y_pred_train = modello.predict(X_train)
 print(f"Accuratezza sul testing set: {accuratezza:.4f}")
 print(f"Accuratezza sul validation set: {accuratezza_validation:.4f}")
 print(f"Accuratezza sul training set: {(accuracy_score(y_train, y_pred_train)):.4f}")
+print()
 
 #%% STUDIO STATISTICO SUI RISULTATI DELLA VALUTAZIONE
 
@@ -557,7 +558,7 @@ for metrica in metriche_srs:
     inferenza_media(len(campione), campione, 0.05) #calcolo dell'intervallo di confidenza della media
     print(f"Mediana: {(np.median(campione)):.4f}")
     
-    print(f"Varianza: {(campione.var(ddof = 0)):.4f}")
+    print(f"Deviazione standard: {(np.std(campione)):.4f}")
     print(f"IQR: {(np.percentile(campione, 75) - np.percentile(campione, 25)):.4f}")
 
     #Stampa dei grafici di distribuzione dei valori
