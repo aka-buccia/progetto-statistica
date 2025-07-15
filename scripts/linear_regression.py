@@ -70,6 +70,16 @@ plt.title('Boxplot dei Residui')
 plt.ylabel("Dimensione residui (°C)")
 plt.show()
 
+#Dimensione residui
+plt.figure(figsize=(10, 5))
+indici = list(range(1, len(residui) + 1))
+plt.plot(indici, residui, color="green", linestyle="-", marker="o")
+plt.xlabel("Indice")
+plt.ylabel("Residuo (dimensione)")
+plt.title("Plot dell'ampiezza dei residui")
+plt.grid(True)
+plt.show()
+
 # Q-Q plot
 sm.qqplot(residui, line='s')
 plt.title('Q-Q Plot dei Residui')
