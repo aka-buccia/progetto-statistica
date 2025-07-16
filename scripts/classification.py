@@ -67,9 +67,9 @@ print()
 #Selezione città e individuazione indici nel dataset
 citta = "OSLO"
 chiavi = list(conteggi.keys()) #lista città
-valori = list(conteggi.values()) #num parametri associati ad ogni citta
+valori = list(conteggi.values()) #numero parametri associati ad ogni città
 indici_citta = [0,0]
-indici_citta[0] = sum(valori[:chiavi.index(citta)]) + 2 #posizione prima colonna della città
+indici_citta[0] = sum(valori[:chiavi.index(citta)]) + 2  #posizione prima colonna della città
 indici_citta[1] = indici_citta[0] + conteggi[citta] #posizione ultima colonna della città
 
 #Costruzione dataset città
@@ -388,9 +388,9 @@ for modello in modelli_SVM:
 #Accuratezza del modello migliore sul validation set
 accuratezza_SVM = accuracy_score(y_val, modello_migliore_SVM.predict(X_val))
 
-print("Miglior modello SVC:", modello_migliore_SVM)
-print("Migliori parametri SVC:", parametri_migliori_SVM)
-print("Accuratezza SVC sul validation set:", accuratezza_SVM)
+print("Miglior modello SVM:", modello_migliore_SVM)
+print("Migliori parametri SVM:", parametri_migliori_SVM)
+print("Accuratezza SVM sul validation set:", accuratezza_SVM)
 print()
 
 #%% Hyperparameter tuning su modello Regressione Logistica
