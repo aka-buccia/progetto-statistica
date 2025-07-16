@@ -55,4 +55,4 @@ deactivate
   Data and metadata available at <http://www.ecad.eu>
 - Florian Huber, Dafne van Kuppevelt, Peter Steinbach, Colin Sauze, Yang Liu, Berend Weel, "Will the sun shine? – An accessible dataset for teaching machine learning and deep learning", DOI TO BE ADDED!
   Data and metadata available at <https://github.com/florian-huber/weather_prediction_dataset>
-- Dataset available on Kaggle at <https://www.kaggle.com/datasets/thedevastator/weather-prediction/data?select=weather_prediction_bbq_labels.csv>
+- Dataset available on Kaggle at <https://www.kaggle.com/datasets/thedevastator/weather-prediction>
