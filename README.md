@@ -9,6 +9,11 @@
 
 Please note that linear regression analysis requires a processed (cleaned) dataset. Therefore, it's required to run `classification.py` at least once before executing `linear_regression.py`.
 
+## Report
+In the /reports directory there's available:
+- **report.pdf** and **report.ipynb**: a detailed report of the analysis
+- **project_presentation.pdf**: a general presentation of the project for exam evaluation
+
 ## Change city
 
 The dataset contains data for 18 European cities. My analysis was conducted on Oslo, but the code is designed to work with other cities as well. You only need to change the value of the variable `citta` in both scripts. The selected city should have all the weather parameters registered, and among the 18 cities, only the following meet this requirement:
